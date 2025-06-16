@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload CSV para n8n</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+    }
+    .instructions {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .instructions ol {
+      padding-left: 1.2rem;
+    }
+    .instructions a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .instructions a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2.5rem 3rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
+    }
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.3s ease;
+    }
+    input[type="file"]:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 6px #007bffaa;
+    }
+    button {
+      background-color: #007bff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      color: white;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    #message {
+      margin-top: 1.4rem;
+      font-weight: 700;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      display: none;
+      user-select: none;
+    }
+    #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    #downloadBtn {
+      margin-top: 1.5rem;
+      display: none;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+    }
+    #downloadBtn:hover {
+      background-color: #1e7e34;
+    }
+
+    .instructions li:nth-child(3) {
+      margin-bottom: 1.2rem;
+    }
+
+   .botao-link {
+  display: inline-block;
+  background-color: #b9d5f3;
+  color: #fff;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.botao-link:hover {
+  background-color: #8dbff5;
+}
+  </style>
+</head>
+<body>
+
+  <div class="instructions">
+    <h3>Passo a passo para processar o arquivo CSV</h3>
+    <ol>
+      <li>
+        Acesse o <strong>n8n</strong>: 
+        <a href="https://editor.n8n-qa.markesistemas.com.br" target="_blank">https://editor.n8n-qa.markesistemas.com.br</a>
+      </li>
+      <li>
+        Localize o fluxo: <strong>Contatos - Conversão</strong>
+      </li>
+      <li>
+        Clique aqui para abrir diretamente: 
+        <a class="botao-link" href="https://editor.n8n-qa.markesistemas.com.br/workflow/JJff6BLNhRI5mwEN" target="_blank">
+        Abrir fluxo no n8n
+      </a>
+    </li>
+
+      <li>
+        Clique em <strong>Test Workflow</strong> para iniciar o fluxo
+      </li>
+      <li>
+        Escolha o arquivo CSV abaixo e clique em <strong>Enviar</strong>
+      </li>
+      <li>
+        Após o processamento, clique em <strong>Baixar arquivo modificado</strong>
+      </li>
+      <li>
+        Prossiga com a importação de contatos no <strong>Markedesk</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="container">
+    <h2>Enviar arquivo CSV</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" id="file" name="data" accept=".csv" required />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <div id="message"></div>
+
+    <a id="downloadBtn" href="#" download="arquivo-modificado.csv">Baixar arquivo modificado</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const messageDiv = document.getElementById('message');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      messageDiv.style.display = 'none';
+      messageDiv.textContent = '';
+      messageDiv.className = '';
+      downloadBtn.style.display = 'none';
+
+      const fileInput = document.getElementById('file');
+      const file = fileInput.files[0];
+      if (!file) {
+        showMessage('Por favor, selecione um arquivo.', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('data', file);
+
+      try {
+        submitButton.disabled = true;
+        const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/upload-contato', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'file-name': file.name
+          }
+        });
+
+        if (response.ok) {
+          showMessage('Arquivo enviado com sucesso!', 'success');
+
+          // Aqui deve vir o link real para o arquivo modificado disponibilizado pelo n8n
+          const arquivoModificadoURL = 'https://seuservidor.com/arquivos/arquivo-modificado.csv';
+
+          downloadBtn.href = arquivoModificadoURL;
+          downloadBtn.style.display = 'inline-block';
+        } else {
+          showMessage('Falha no envio do arquivo.', 'error');
+        }
+      } catch (error) {
+        showMessage('Erro: ' + error.message, 'error');
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    function showMessage(msg, type) {
+      messageDiv.textContent = msg;
+      messageDiv.className = type;
+      messageDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
