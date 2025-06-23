@@ -17,6 +17,12 @@
       align-items: center;
       color: #333;
     }
+
+    .logo {
+      max-width: 180px;
+      margin-bottom: 1.5rem;
+    }
+
     .instructions {
       background: #fff;
       padding: 2rem;
@@ -26,18 +32,22 @@
       margin-bottom: 2rem;
       box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
     }
+
     .instructions h3 {
       margin-top: 0;
-      color: #2c3e50;
+      color: #006b76;
     }
+
     .instructions ol {
       padding-left: 1.2rem;
     }
+
     .instructions a {
-      color: #007bff;
+      color: #006b76;
       text-decoration: none;
       font-weight: bold;
     }
+
     .instructions a:hover {
       text-decoration: underline;
     }
@@ -51,32 +61,37 @@
       max-width: 400px;
       text-align: center;
     }
+
     h2 {
       margin-bottom: 1.5rem;
       font-weight: 700;
-      color: #2c3e50;
+      color: #006b76;
     }
+
     form {
       display: flex;
       flex-direction: column;
       gap: 1.2rem;
       align-items: center;
     }
+
     input[type="file"] {
       padding: 0.5rem;
-      border: 2px solid #ddd;
+      border: 2px solid #ccc;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
       transition: border-color 0.3s ease;
     }
+
     input[type="file"]:focus {
       outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 6px #007bffaa;
+      border-color: #006b76;
+      box-shadow: 0 0 6px #006b76aa;
     }
+
     button {
-      background-color: #007bff;
+      background-color: #006b76;
       border: none;
       padding: 0.75rem 1.5rem;
       color: white;
@@ -87,13 +102,16 @@
       width: 100%;
       transition: background-color 0.3s ease;
     }
+
     button:hover:not(:disabled) {
-      background-color: #0056b3;
+      background-color: #004f59;
     }
+
     button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
+
     #message {
       margin-top: 1.4rem;
       font-weight: 700;
@@ -102,16 +120,19 @@
       display: none;
       user-select: none;
     }
+
     #message.success {
       background-color: #d4edda;
       color: #155724;
       border: 1px solid #c3e6cb;
     }
+
     #message.error {
       background-color: #f8d7da;
       color: #721c24;
       border: 1px solid #f5c6cb;
     }
+
     #downloadBtn {
       margin-top: 1.5rem;
       display: none;
@@ -127,62 +148,48 @@
       font-size: 1.1rem;
       transition: background-color 0.3s ease;
     }
+
     #downloadBtn:hover {
       background-color: #1e7e34;
     }
 
-    .instructions li:nth-child(3) {
-      margin-bottom: 1.2rem;
+    .botao-link {
+      display: inline-block;
+      background-color: #006a7652;
+      color: #fff;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      transition: background-color 0.3s ease;
     }
 
-   .botao-link {
-  display: inline-block;
-  background-color: #b9d5f3;
-  color: #fff;
-  padding: 0.4rem 0.9rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  margin-left: 0.5rem;
-  transition: background-color 0.3s ease;
-}
-
-.botao-link:hover {
-  background-color: #8dbff5;
-}
+    .botao-link:hover {
+      background-color: #11818d94;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Substitua a URL abaixo pela logo oficial da Marke -->
+  <img class="logo" src="img/interno.png" alt="Logo da Marke" />
+
   <div class="instructions">
     <h3>Passo a passo para processar o arquivo CSV</h3>
     <ol>
-      <li>
-        Acesse o <strong>n8n</strong>: 
+      <li>Acesse o <strong>n8n</strong>: 
         <a href="https://editor.n8n-qa.markesistemas.com.br" target="_blank">https://editor.n8n-qa.markesistemas.com.br</a>
       </li>
+      <li>Localize o fluxo: <strong>Contatos - Conversão</strong></li>
       <li>
-        Localize o fluxo: <strong>Contatos - Conversão</strong>
+        Clique aqui para abrir diretamente:
+        <a class="botao-link" href="https://editor.n8n-qa.markesistemas.com.br/workflow/JJff6BLNhRI5mwEN" target="_blank">Abrir fluxo no n8n</a>
       </li>
-      <li>
-        Clique aqui para abrir diretamente: 
-        <a class="botao-link" href="https://editor.n8n-qa.markesistemas.com.br/workflow/JJff6BLNhRI5mwEN" target="_blank">
-        Abrir fluxo no n8n
-      </a>
-    </li>
-
-      <li>
-        Clique em <strong>Test Workflow</strong> para iniciar o fluxo
-      </li>
-      <li>
-        Escolha o arquivo CSV abaixo e clique em <strong>Enviar</strong>
-      </li>
-      <li>
-        Após o processamento, clique em <strong>Baixar arquivo modificado</strong>
-      </li>
-      <li>
-        Prossiga com a importação de contatos no <strong>Markedesk</strong>
-      </li>
+      <li>Clique em <strong>Test Workflow</strong> para iniciar o fluxo</li>
+      <li>Escolha o arquivo CSV abaixo e clique em <strong>Enviar</strong></li>
+      <li>Após o processamento, clique em <strong>Baixar arquivo modificado</strong></li>
+      <li>Prossiga com a importação de contatos no <strong>Markedesk</strong></li>
     </ol>
   </div>
 
@@ -193,27 +200,7 @@
       <button type="submit">Enviar</button>
     </form>
 
-  <div id="spinner" style="display:none; margin-top: 1rem;">
-    <svg width="40" height="40" viewBox="0 0 40 40" stroke="#007bff">
-      <g fill="none" fill-rule="evenodd">
-        <g transform="translate(2 2)" stroke-width="4">
-          <circle stroke-opacity=".2" cx="18" cy="18" r="18" />
-          <path d="M36 18c0-9.94-8.06-18-18-18">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="0 18 18"
-              to="360 18 18"
-              dur="1s"
-              repeatCount="indefinite" />
-          </path>
-        </g>
-      </g>
-    </svg>
-  </div>
-
-  <div id="message"></div>
-
+    <div id="message"></div>
     <a id="downloadBtn" href="#" download="arquivo-modificado.csv">Baixar arquivo modificado</a>
   </div>
 
@@ -222,7 +209,6 @@
     const messageDiv = document.getElementById('message');
     const submitButton = form.querySelector('button[type="submit"]');
     const downloadBtn = document.getElementById('downloadBtn');
-    const spinner = document.getElementById('spinner'); // <- adiciona isso
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -230,13 +216,11 @@
       messageDiv.textContent = '';
       messageDiv.className = '';
       downloadBtn.style.display = 'none';
-      spinner.style.display = 'block'; // mostrar spinner
 
       const fileInput = document.getElementById('file');
       const file = fileInput.files[0];
       if (!file) {
         showMessage('Por favor, selecione um arquivo.', 'error');
-        spinner.style.display = 'none'; // esconder spinner
         return;
       }
 
@@ -265,6 +249,7 @@
           } else {
             showMessage('Arquivo enviado, mas não foi possível obter o link para download.', 'error');
           }
+
         } else {
           showMessage('Falha no envio do arquivo.', 'error');
         }
@@ -272,7 +257,6 @@
         showMessage('Erro: ' + error.message, 'error');
       } finally {
         submitButton.disabled = false;
-        spinner.style.display = 'none'; // esconder spinner
       }
     });
 
