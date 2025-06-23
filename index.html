@@ -193,7 +193,26 @@
       <button type="submit">Enviar</button>
     </form>
 
-    <div id="message"></div>
+  <div id="spinner" style="display:none; margin-top: 1rem;">
+    <svg width="40" height="40" viewBox="0 0 40 40" stroke="#007bff">
+      <g fill="none" fill-rule="evenodd">
+        <g transform="translate(2 2)" stroke-width="4">
+          <circle stroke-opacity=".2" cx="18" cy="18" r="18" />
+          <path d="M36 18c0-9.94-8.06-18-18-18">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 18 18"
+              to="360 18 18"
+              dur="1s"
+              repeatCount="indefinite" />
+          </path>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div id="message"></div>
 
     <a id="downloadBtn" href="#" download="arquivo-modificado.csv">Baixar arquivo modificado</a>
   </div>
@@ -203,6 +222,7 @@
     const messageDiv = document.getElementById('message');
     const submitButton = form.querySelector('button[type="submit"]');
     const downloadBtn = document.getElementById('downloadBtn');
+    const spinner = document.getElementById('spinner'); // <- adiciona isso
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -210,11 +230,13 @@
       messageDiv.textContent = '';
       messageDiv.className = '';
       downloadBtn.style.display = 'none';
+      spinner.style.display = 'block'; // mostrar spinner
 
       const fileInput = document.getElementById('file');
       const file = fileInput.files[0];
       if (!file) {
         showMessage('Por favor, selecione um arquivo.', 'error');
+        spinner.style.display = 'none'; // esconder spinner
         return;
       }
 
@@ -223,7 +245,7 @@
 
       try {
         submitButton.disabled = true;
-        const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/upload-contato', {
+        const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/b59efb8e-dcc3-44d4-bc22-84e30a199355', {
           method: 'POST',
           body: formData,
           headers: {
@@ -233,12 +255,16 @@
 
         if (response.ok) {
           showMessage('Arquivo enviado com sucesso!', 'success');
+          const result = await response.json();
 
-          // Aqui deve vir o link real para o arquivo modificado disponibilizado pelo n8n
-          const arquivoModificadoURL = 'https://seuservidor.com/arquivos/arquivo-modificado.csv';
-
-          downloadBtn.href = arquivoModificadoURL;
-          downloadBtn.style.display = 'inline-block';
+          if (result && result.downloadUrl) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            showMessage('Arquivo pronto para download!', 'success');
+            downloadBtn.href = result.downloadUrl;
+            downloadBtn.style.display = 'inline-block';
+          } else {
+            showMessage('Arquivo enviado, mas não foi possível obter o link para download.', 'error');
+          }
         } else {
           showMessage('Falha no envio do arquivo.', 'error');
         }
@@ -246,6 +272,7 @@
         showMessage('Erro: ' + error.message, 'error');
       } finally {
         submitButton.disabled = false;
+        spinner.style.display = 'none'; // esconder spinner
       }
     });
 
