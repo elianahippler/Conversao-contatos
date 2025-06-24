@@ -71,18 +71,21 @@
     {
       "parameters": {
         "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
         "path": "b59efb8e-dcc3-44d4-bc22-84e30a199355",
         "responseMode": "lastNode",
         "options": {
-          "allowedOrigins": "https://elianahippler.github.io/Conversao-contatos/"
+          "allowedOrigins": "*"
         }
       },
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        920,
-        -800
+        960,
+        -680
       ],
       "id": "05ef9128-9b2c-4983-b36e-3e7758da1036",
       "webhookId": "b59efb8e-dcc3-44d4-bc22-84e30a199355"
@@ -204,14 +207,14 @@
     },
     "Webhook": {
       "main": [
-        [],
         [
           {
             "node": "Google Drive Download",
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        []
       ]
     },
     "Google Drive Modificado": {
@@ -237,11 +240,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c88540d8-ab6e-4d7a-b864-b396cecd7aee",
+  "versionId": "5d2fd6fa-0f3d-486b-a382-102c08ba5e31",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "22eecf610d66ada7c73eab46e13d35e3b3763f50ca9dc1517d68e299a265c0ae"
