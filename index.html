@@ -184,72 +184,105 @@
     <div class="loader" id="loader"></div>
 
     <div id="message"></div>
-    <a id="downloadBtn" href="#" download="arquivo-modificado.csv">Baixar arquivo modificado</a>
+    <a id="downloadBtn" href="#" target="_blank" rel="noopener noreferrer">Baixar arquivo modificado</a>
   </div>
 
   <script>
-    const form = document.getElementById('uploadForm');
-    const messageDiv = document.getElementById('message');
-    const submitButton = form.querySelector('button[type="submit"]');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const loader = document.getElementById('loader');
+  const form = document.getElementById('uploadForm');
+  const messageDiv = document.getElementById('message');
+  const submitButton = form.querySelector('button[type="submit"]');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const loader = document.getElementById('loader');
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      messageDiv.style.display = 'none';
-      messageDiv.textContent = '';
-      messageDiv.className = '';
-      downloadBtn.style.display = 'none';
-      loader.style.display = 'block';
+  // Função para mostrar mensagens animadas durante o processamento
+  async function showLoadingMessages(messages, intervalMs) {
+    for (const msg of messages) {
+      showMessage(msg, 'success'); // você pode criar outro estilo se quiser
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+  }
 
-      const fileInput = document.getElementById('file');
-      const file = fileInput.files[0];
-      if (!file) {
-        showMessage('Por favor, selecione um arquivo.', 'error');
-        loader.style.display = 'none';
-        return;
-      }
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    messageDiv.style.display = 'none';
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    downloadBtn.style.display = 'none';
+    loader.style.display = 'block';
 
-      const formData = new FormData();
-      formData.append('data', file);
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+    if (!file) {
+      showMessage('Por favor, selecione um arquivo.', 'error');
+      loader.style.display = 'none';
+      return;
+    }
 
-      try {
-        submitButton.disabled = true;
-        
-        //const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/3d24c951-56b0-4674-a0b3-a8762557d856', {
-        const response = await fetch('https://webhooks.n8n-qa.markesistemas.com.br/webhook/3d24c951-56b0-4674-a0b3-a8762557d856', {
+    const formData = new FormData();
+    formData.append('data', file);
+
+    try {
+      submitButton.disabled = true;
+
+      // Inicia mensagens animadas em paralelo com a requisição
+      const loadingMsgs = [
+        'Recebendo seu arquivo...',
+        'Processando dados, quase lá...',
+        'Preparando arquivo modificado...',
+        'Quase pronto!'
+      ];
+
+      // Rodar a animação de mensagens (não espera, roda paralelamente)
+      const loadingPromise = showLoadingMessages(loadingMsgs, 1500);
+
+      // Faz o fetch para enviar o arquivo
+      const response = await fetch('https://webhooks.n8n-qa.markesistemas.com.br/webhook/172201ab-5635-4f31-b443-98d0f0fbf58f', {
+      // const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/172201ab-5635-4f31-b443-98d0f0fbf58f', {
         method: 'POST',
         body: formData,
       });
 
-        if (response.ok) {
-          showMessage('Arquivo enviado com sucesso!', 'success');
-          const result = await response.json();
+      // Espera a animação terminar (se ainda não terminou)
+      await loadingPromise;
 
-          if (result && result.downloadUrl) {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            showMessage('Arquivo pronto para download!', 'success');
-            downloadBtn.href = result.downloadUrl;
-            downloadBtn.style.display = 'inline-block';
-          } else {
-            showMessage('Arquivo enviado, mas não foi possível obter o link para download.', 'error');
+      if (response.ok) {
+        showMessage('Arquivo enviado com sucesso!', 'success');
+        const result = await response.json();
+
+        if (result && result.downloadUrl) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          showMessage('Arquivo pronto para download!', 'success');
+
+          let url = result.downloadUrl;
+          if (url.startsWith('=')) {
+            url = url.substring(1);
           }
-        } else {
-          showMessage('Falha no envio do arquivo.', 'error');
-        }
-      } catch (error) {
-        showMessage('Erro: ' + error.message, 'error');
-      } finally {
-        submitButton.disabled = false;
-        loader.style.display = 'none';
-      }
-    });
 
-    function showMessage(msg, type) {
-      messageDiv.textContent = msg;
-      messageDiv.className = type;
-      messageDiv.style.display = 'block';
+          console.log('URL para download:', url);
+
+          downloadBtn.href = url;
+          downloadBtn.style.display = 'inline-block';
+          downloadBtn.target = '_blank';
+        } else {
+          showMessage('Arquivo enviado, mas não foi possível obter o link para download.', 'error');
+        }
+      } else {
+        showMessage('Falha no envio do arquivo.', 'error');
+      }
+    } catch (error) {
+      showMessage('Erro: ' + error.message, 'error');
+    } finally {
+      submitButton.disabled = false;
+      loader.style.display = 'none';
     }
-  </script>
+  });
+
+  function showMessage(msg, type) {
+    messageDiv.textContent = msg;
+    messageDiv.className = type;
+    messageDiv.style.display = 'block';
+  }
+</script>
+
 </body>
 </html>
