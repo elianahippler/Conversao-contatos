@@ -197,7 +197,7 @@
   // Função para mostrar mensagens animadas durante o processamento
   async function showLoadingMessages(messages, intervalMs) {
     for (const msg of messages) {
-      showMessage(msg, 'success'); // você pode criar outro estilo se quiser
+      showMessage(msg, 'success'); 
       await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
   }
@@ -241,7 +241,6 @@
         body: formData,
       });
 
-      // Espera a animação terminar (se ainda não terminou)
       await loadingPromise;
 
       if (response.ok) {
