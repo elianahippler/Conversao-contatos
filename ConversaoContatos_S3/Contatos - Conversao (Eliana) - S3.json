@@ -1,0 +1,237 @@
+{
+  "name": "Contatos - Conversao (Eliana) - S3",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const binKey = Object.keys(items[0].binary || {})[0]; // pega a primeira chave binária\nconst csv = items[0].binary?.[binKey]?.data;\n\nif (!csv) {\n  throw new Error('Arquivo CSV não encontrado na propriedade binária.');\n}\n\nconst buffer = Buffer.from(csv, 'base64');\nconst csvString = buffer.toString('utf8');\n\nconst linhas = csvString.split('\\n');\nconst headers = linhas[0].split(',');\n\nconst result = [];\n\nfor (let i = 1; i < linhas.length; i++) {\n  if (!linhas[i].trim()) continue;\n  const valores = linhas[i].split(',');\n  const json = {};\n  for (let j = 0; j < headers.length; j++) {\n    json[headers[j].trim()] = valores[j] ? valores[j].trim() : '';\n  }\n  result.push({ json });\n}\n\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4832,
+        -432
+      ],
+      "id": "ff0fe989-0832-4abe-8660-d2d57614a9e0",
+      "name": "CSV Parse"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nomeHeader = 'nome';\nconst phoneHeader = 'Phone 1 - Value';\n\nconst csvRows = [];\n\n// Cabeçalho fixo\nconst headers = [nomeHeader, 'telefone'];\ncsvRows.push(headers.join(';'));\n\n// Linhas\nfor (const item of items) {\n  const nome = [\n    item.json['First Name'],\n    item.json['Middle Name'],\n    item.json['Last Name']\n  ].filter(Boolean).join(' ').trim();\n\n  const rowBase = [`\"${nome.replace(/\"/g, '\"\"')}\"`];\n\n  const phoneValue = item.json[phoneHeader] || '';\n  const primeiroTelefone = phoneValue.split(',')[0]?.trim() || '';\n\n  // Remove caracteres não numéricos e o prefixo 55 se existir no início\n  const apenasNumeros = primeiroTelefone.replace(/[^\\d]/g, '').replace(/^55/, '');\n  const phoneCol = `\"${apenasNumeros}\"`;\n\n  const row = [...rowBase, phoneCol];\n\n  csvRows.push(row.join(';'));\n}\n\nconst csvString = csvRows.join('\\n');\nconst buffer = Buffer.from(csvString, 'latin1');\n\nreturn [{\n  binary: {\n    data: await this.helpers.prepareBinaryData(buffer, 'contatos_modificado.csv', 'text/csv'),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5184,
+        -432
+      ],
+      "id": "c2636e30-c1cd-4da0-93cf-f3b4f9a9739e",
+      "name": "CSV Stringify"
+    },
+    {
+      "parameters": {
+        "content": "## Função: \n\n* O Markedesk só importa um modelo específico de planilha para importação de contatos.\n\n* Quando cliente optar por importar a **Planilha de contatos gerada pelo Google Agenda**, deve converter essa planilha para o modelo modificado - correto.\n\n* E prosseguir com a importação de seus contatos na plataforma.",
+        "height": 220,
+        "width": 680,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4656,
+        -720
+      ],
+      "id": "c6b31ac7-473c-4183-bc45-62c077871fdb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "\n## Link - Conversor de Planilha de Contatos:\nhttps://elianahippler.github.io/Conversao-contatos/",
+        "height": 100,
+        "width": 520,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4656,
+        -848
+      ],
+      "id": "d9761b6e-4310-464e-95d8-4df1e9a15bb4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "628219fb-5b05-4295-9032-cf14262eb8ad",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        4656,
+        -432
+      ],
+      "id": "141b3d3c-f1f7-4d25-80bf-0d6aad7a8a86",
+      "name": "Webhook",
+      "webhookId": "628219fb-5b05-4295-9032-cf14262eb8ad"
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        5728,
+        -432
+      ],
+      "id": "996cb06a-7676-47d2-b098-5ce3d87e2b3f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.map(item => {\n  return {\n    json: {\n      'First Name': item.json['First Name'] || '',\n      'Middle Name': item.json['Middle Name'] || '',\n      'Last Name': item.json['Last Name'] || '',\n      'Phone 1 - Value': item.json['Phone 1 - Value'] || '',\n    }\n  };\n}); "
+      },
+      "name": "Filtrar Colunas",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        5008,
+        -432
+      ],
+      "id": "ae29e8ac-acb2-4d2d-b4af-816c0d8fc570"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "s3markepublic",
+        "fileName": "contatos_modificado.csv",
+        "additionalFields": {}
+      },
+      "id": "79678425-567d-4c32-a900-0ec0266948b7",
+      "name": "upload to S3 server",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        5376,
+        -432
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "s3": {
+          "id": "icRkkovi5h00u5v5",
+          "name": "BackBlaze S3 - Marke "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "bucketName": "s3markepublic",
+        "fileKey": "contatos_modificado.csv"
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        5552,
+        -432
+      ],
+      "id": "0c5eda4e-f622-4d84-a07b-0d63ad2d8407",
+      "name": "Download a file",
+      "credentials": {
+        "s3": {
+          "id": "icRkkovi5h00u5v5",
+          "name": "BackBlaze S3 - Marke "
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "CSV Parse": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Colunas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV Stringify": {
+      "main": [
+        [
+          {
+            "node": "upload to S3 server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "CSV Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Colunas": {
+      "main": [
+        [
+          {
+            "node": "CSV Stringify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upload to S3 server": {
+      "main": [
+        [
+          {
+            "node": "Download a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download a file": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bccad1da-5de1-4b8e-84d2-e0df0cf0b3e2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "22eecf610d66ada7c73eab46e13d35e3b3763f50ca9dc1517d68e299a265c0ae"
+  },
+  "id": "QBqwTR32sFKDH47H",
+  "tags": [
+    {
+      "createdAt": "2025-06-20T17:14:50.450Z",
+      "updatedAt": "2025-06-20T17:14:50.450Z",
+      "id": "BE11o7L7jf6mRqRB",
+      "name": "Eliana"
+    }
+  ]
+}

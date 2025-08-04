@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload CSV para n8n</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+    }
+
+    .logo {
+      max-width: 180px;
+      margin-bottom: 1.5rem;
+    }
+
+    .instructions {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+      color: #006b76;
+    }
+
+    .instructions ol {
+      padding-left: 1.2rem;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2.5rem 3rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      color: #006b76;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="file"]:focus {
+      outline: none;
+      border-color: #006b76;
+      box-shadow: 0 0 6px #006b76aa;
+    }
+
+    button {
+      background-color: #006b76;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      color: white;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #004f59;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #006b76;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+      margin: 1rem auto 0; /* margem top 1rem, horizontal auto para centralizar */
+      display: none;
+    }
+
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #message {
+      margin-top: 1.4rem;
+      font-weight: 700;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      display: none;
+      user-select: none;
+    }
+
+    #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    #downloadBtn {
+      margin-top: 1.5rem;
+      display: none;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    #downloadBtn:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+  <img class="logo" src="img/interno.png" alt="Logo da Marke" />
+
+  <div class="instructions">
+    <h3>Passo a passo:</h3>
+    <ol>
+      <li>Escolha o arquivo CSV abaixo e clique em <strong>Enviar</strong></li>
+      <li>Após o processamento, clique em <strong>Baixar arquivo modificado</strong></li>
+      <li>Prossiga com a importação de contatos no <strong>Markedesk</strong></li>
+    </ol>
+  </div>
+
+  <div class="container">
+    <h2>Enviar arquivo CSV</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" id="file" name="data" accept=".csv" required />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <div class="loader" id="loader"></div>
+
+    <div id="message"></div>
+    <a id="downloadBtn" href="#" target="_blank" rel="noopener noreferrer">Baixar arquivo modificado</a>
+  </div>
+
+  <script>
+  const form = document.getElementById('uploadForm');
+  const messageDiv = document.getElementById('message');
+  const submitButton = form.querySelector('button[type="submit"]');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const loader = document.getElementById('loader');
+
+  // Função para mostrar mensagens animadas durante o processamento
+  async function showLoadingMessages(messages, intervalMs) {
+    for (const msg of messages) {
+      showMessage(msg, 'success'); // você pode criar outro estilo se quiser
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    messageDiv.style.display = 'none';
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    downloadBtn.style.display = 'none';
+    loader.style.display = 'block';
+
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+    if (!file) {
+      showMessage('Por favor, selecione um arquivo.', 'error');
+      loader.style.display = 'none';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('data', file);
+
+    try {
+      submitButton.disabled = true;
+
+      // Inicia mensagens animadas em paralelo com a requisição
+      const loadingMsgs = [
+        'Recebendo seu arquivo...',
+        'Processando dados...',
+        'Quase pronto!'
+      ];
+
+      // Rodar a animação de mensagens (não espera, roda paralelamente)
+      const loadingPromise = showLoadingMessages(loadingMsgs, 4000);
+
+      // Faz o fetch para enviar o arquivo
+      const response = await fetch('https://webhooks.n8n-qa.markesistemas.com.br/webhook/628219fb-5b05-4295-9032-cf14262eb8ad', {
+      // const response = await fetch('https://editor.n8n-qa.markesistemas.com.br/webhook-test/628219fb-5b05-4295-9032-cf14262eb8ad', {
+        method: 'POST',
+        body: formData,
+      });
+
+      // Espera a animação terminar (se ainda não terminou)
+      await loadingPromise;
+
+      if (response.ok) {
+        showMessage('Arquivo enviado com sucesso!', 'success');
+        
+        // Recebe a resposta como arquivo binário (blob)
+        const blob = await response.blob();
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        showMessage('Arquivo pronto para download!', 'success');
+
+        // Cria uma URL para o blob e configura o download
+        const downloadUrl = window.URL.createObjectURL(blob);
+        
+        // Define um nome padrão para o arquivo ou tenta obter do cabeçalho Content-Disposition
+        let filename = 'contatos_modificado.csv';
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1].replace(/['"]/g, '');
+          }
+        }
+
+        console.log('Arquivo binário recebido, preparando download...');
+
+        downloadBtn.href = downloadUrl;
+        downloadBtn.download = filename; // Define o nome do arquivo para download
+        downloadBtn.style.display = 'inline-block';
+        downloadBtn.target = '_blank';
+        
+        // Libera a URL do objeto quando não precisar mais dela
+        downloadBtn.addEventListener('click', () => {
+          setTimeout(() => {
+            window.URL.revokeObjectURL(downloadUrl);
+          }, 100);
+        });
+      } else {
+        showMessage('Falha no envio do arquivo.', 'error');
+      }
+    } catch (error) {
+      showMessage('Erro: ' + error.message, 'error');
+    } finally {
+      submitButton.disabled = false;
+      loader.style.display = 'none';
+    }
+  });
+
+  function showMessage(msg, type) {
+    messageDiv.textContent = msg;
+    messageDiv.className = type;
+    messageDiv.style.display = 'block';
+  }
+</script>
+</body>
+</html>
